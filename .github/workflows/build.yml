@@ -10,18 +10,18 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      docker_tag: ${{ steps.create-docker-tag.outputs.DOCKER_TAG }}
     steps:
       - name: Checkout Code
         uses: actions/checkout@v3
 
       - name: Crete Docker Tag
         id: create-docker-tag
-        outputs:
-          docker_tag: ${{ steps.get-latest-tag.outputs.latest_tag }}.${{ github.event.inputs.build_number }}
         run: |
           LATEST_GITHUB_TAG=$(git describe --tags `git rev-list --tags --max-count=1`)
-          echo "LATEST_GITHUB_TAG=$LATEST_GITHUB_TAG" >> $GITHUB_OUTPUT
-
+          echo "DOCKER_TAG=${LATEST_GITHUB_TAG}.${{ github.event.inputs.build_number }}" >> $GITHUB_OUTPUT
+          
       - name: Build Docker Image
         run: |
           docker build -t dieguscl/component-a:$DOCKER_TAG .
